@@ -22,3 +22,6 @@ Thumbs.db
 
 # Tauri
 src-tauri/gen/
+
+# Engram journal (local developer state)
+.engram/

@@ -63,9 +63,6 @@ export async function sendMessage(
       sessionID,
       directory: PLUGIN_DIR,
       parts: [{ type: "text", text }],
-      // Model and agent will use whatever OpenCode has configured
-      // via the glintlock-opencode plugin (opencode.json)
-      model: { providerID: "", modelID: "" },
     },
     onEvent
       ? {
@@ -84,4 +81,29 @@ export async function subscribeToEvents() {
   const c = getClient();
   const result = await c.event.subscribe({ directory: PLUGIN_DIR });
   return result;
+}
+
+/**
+ * Read a file from the project directory. Returns content or null if missing.
+ */
+export async function readWorldFile(path: string): Promise<string | null> {
+  const c = getClient();
+  const { data, error } = await c.file.read({ path, directory: PLUGIN_DIR });
+  if (error || !data) return null;
+  return typeof data === "string" ? data : (data as { content?: string }).content ?? null;
+}
+
+/**
+ * List files in a project directory. Returns filenames or empty array.
+ */
+export async function listWorldDirectory(path: string): Promise<string[]> {
+  const c = getClient();
+  const { data, error } = await c.file.list({ path, directory: PLUGIN_DIR });
+  if (error || !data) return [];
+  if (Array.isArray(data)) {
+    return data.map((entry) =>
+      typeof entry === "string" ? entry : (entry as { name?: string }).name ?? "",
+    ).filter(Boolean);
+  }
+  return [];
 }

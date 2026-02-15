@@ -1,5 +1,7 @@
 # CLAUDE.md
 
+claude.ai/code
+
 ## Overview
 
 Glintlock Desktop — a Tauri desktop app providing a visual TTRPG frontend for Glintlock campaigns. It's a pure UI layer; all game logic lives in the [glintlock-opencode](https://github.com/glintlockGG/glintlock-opencode) plugin.
@@ -14,6 +16,10 @@ App launch → Tauri spawns `opencode serve` → Frontend connects via @opencode
 - **React frontend** (`src/`) — Connects via `@opencode-ai/sdk/v2/client` to the local OpenCode server. Displays chat, quests, NPCs, session log.
 - **OpenCode plugin** (`/Users/dakeobac/Coding/glintlock-opencode`) — The actual game engine. Contains agents, skills, commands, MCP tools. The Tauri app just talks to it via HTTP.
 
+The Rust→React bridge is the `get_opencode_port` Tauri IPC command (`lib.rs:22`). The frontend calls it on mount to learn the port, then initializes the SDK client.
+
+`PLUGIN_DIR` is hardcoded in two places: `src-tauri/src/lib.rs:11` and `src/lib/opencode.ts:4`. Keep them in sync.
+
 ## Build Commands
 
 ```bash
@@ -23,19 +29,25 @@ cargo tauri dev
 # Production build
 cargo tauri build
 
-# Frontend only (no Tauri)
+# Frontend only (no Tauri) — runs on localhost:1420
 npm run dev
 ```
 
+## TypeScript
+
+Strict mode is on — `noUnusedLocals` and `noUnusedParameters` are enabled, so unused variables/imports will fail the build. Prefix with `_` to suppress.
+
+## Styling
+
+Tailwind CSS v4 via `@tailwindcss/vite` plugin — no `tailwind.config` file. Theme is configured with `@theme` directives in `src/index.css`.
+
 ## Key Files
 
-| File | Purpose |
-|------|---------|
-| `src/App.tsx` | Root layout — left rail, center workspace, right drawer, bottom bar |
-| `src/lib/opencode.ts` | SDK client wrapper for OpenCode server |
-| `src/components/ChatView.tsx` | Primary play interface |
-| `src-tauri/src/lib.rs` | Rust backend — spawns OpenCode, exposes port |
-| `src-tauri/tauri.conf.json` | Window config, app metadata |
+- `src/App.tsx` — Root layout: left rail, center workspace, right drawer, bottom bar
+- `src/lib/opencode.ts` — SDK client wrapper for OpenCode server
+- `src/components/ChatView.tsx` — Primary play interface
+- `src-tauri/src/lib.rs` — Rust backend: spawns OpenCode, exposes port via IPC
+- `src-tauri/tauri.conf.json` — Window config, app metadata
 
 ## Design System
 

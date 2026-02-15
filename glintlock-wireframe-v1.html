@@ -1,0 +1,1607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Glintlock Companion — Wireframe v1</title>
+<style>
+  /* ========================================
+     WIREFRAME TOKENS
+     Using a restrained palette to keep focus
+     on layout and information architecture.
+     Final design will use the full Glintlock
+     design system (dark charcoal, torchlight
+     amber, parchment text).
+     ======================================== */
+
+  :root {
+    /* Wireframe grays */
+    --bg-app: #0f1117;
+    --bg-rail: #13151c;
+    --bg-surface: #181b24;
+    --bg-card: #1e2130;
+    --bg-card-hover: #252839;
+    --bg-input: #12141b;
+    --border: #2a2d3a;
+    --border-light: #3a3e50;
+
+    /* Text */
+    --text-primary: #e8e4dc;
+    --text-secondary: #b8b4aa;
+    --text-dim: #6b6860;
+    --text-label: #8a8680;
+
+    /* Accent — torchlight amber */
+    --amber: #e8a44a;
+    --amber-dim: rgba(232,164,74,0.15);
+    --amber-glow: rgba(232,164,74,0.08);
+
+    /* Status */
+    --red: #e85454;
+    --red-dim: rgba(232,84,84,0.15);
+    --green: #4abe7a;
+    --green-dim: rgba(74,190,122,0.15);
+    --blue: #5b8def;
+    --blue-dim: rgba(91,141,239,0.12);
+
+    /* Layout */
+    --rail-width: 64px;
+    --bottom-height: 52px;
+    --right-width: 320px;
+
+    /* Type */
+    --font-body: 'DM Sans', -apple-system, sans-serif;
+    --font-display: 'Cinzel', serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    background: var(--bg-app);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  /* ========================================
+     APP SHELL — Fixed viewport, 4 zones
+     ======================================== */
+
+  .app-shell {
+    display: grid;
+    grid-template-columns: var(--rail-width) 1fr var(--right-width);
+    grid-template-rows: 1fr var(--bottom-height);
+    height: 100vh;
+    width: 100vw;
+  }
+
+  .app-shell.right-collapsed {
+    grid-template-columns: var(--rail-width) 1fr 0px;
+  }
+
+  .app-shell.right-collapsed .right-drawer { display: none; }
+
+  /* ========================================
+     LEFT RAIL — Discord-style icon nav
+     ======================================== */
+
+  .left-rail {
+    grid-row: 1 / -1;
+    background: var(--bg-rail);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 0;
+    gap: 4px;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .rail-logo {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--amber-dim);
+    border: 1px solid var(--amber);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    color: var(--amber);
+    font-weight: 700;
+    font-family: var(--font-display);
+  }
+
+  .rail-divider {
+    width: 28px;
+    height: 1px;
+    background: var(--border);
+    margin: 6px 0;
+  }
+
+  .rail-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    position: relative;
+    font-size: 16px;
+  }
+
+  .rail-btn:hover {
+    background: var(--bg-card);
+    color: var(--text-secondary);
+  }
+
+  .rail-btn.active {
+    background: var(--amber-dim);
+    color: var(--amber);
+  }
+
+  .rail-btn .tooltip {
+    display: none;
+    position: absolute;
+    left: calc(100% + 8px);
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    white-space: nowrap;
+    color: var(--text-primary);
+    z-index: 100;
+    pointer-events: none;
+  }
+
+  .rail-btn:hover .tooltip { display: block; }
+
+  .rail-spacer { flex: 1; }
+
+  /* Character minicard at bottom of rail */
+  .rail-minicard {
+    width: 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 6px 0;
+    margin-top: auto;
+  }
+
+  .minicard-hp {
+    width: 36px;
+    height: 4px;
+    background: var(--bg-card);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .minicard-hp-fill {
+    height: 100%;
+    background: var(--green);
+    border-radius: 2px;
+    transition: width 0.3s;
+  }
+
+  .minicard-hp-fill.wounded { background: var(--amber); }
+  .minicard-hp-fill.critical { background: var(--red); }
+
+  .minicard-label {
+    font-size: 9px;
+    color: var(--text-dim);
+    text-align: center;
+    line-height: 1.2;
+  }
+
+  /* ========================================
+     CENTER WORKSPACE — Main content area
+     ======================================== */
+
+  .center-workspace {
+    background: var(--bg-app);
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 20px 24px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  .center-workspace::-webkit-scrollbar { width: 6px; }
+  .center-workspace::-webkit-scrollbar-track { background: transparent; }
+  .center-workspace::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* View header */
+  .view-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .view-title {
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: 0.02em;
+  }
+
+  .view-subtitle {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-left: 12px;
+  }
+
+  .view-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .btn-small {
+    padding: 4px 12px;
+    border-radius: 5px;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .btn-small:hover {
+    border-color: var(--border-light);
+    background: var(--bg-card-hover);
+  }
+
+  /* ========================================
+     PLAYER VIEW — Character Sheet
+     ======================================== */
+
+  .char-hero {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 16px;
+    align-items: center;
+    padding: 16px 20px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 16px;
+  }
+
+  .char-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    background: var(--bg-card);
+    border: 2px solid var(--border-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+  }
+
+  .char-identity h2 {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.2;
+  }
+
+  .char-identity .char-meta {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 2px;
+  }
+
+  .char-vitals {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .vital-block {
+    text-align: center;
+    padding: 6px 12px;
+    background: var(--bg-card);
+    border-radius: 8px;
+    min-width: 56px;
+  }
+
+  .vital-value {
+    font-family: var(--font-mono);
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+
+  .vital-label {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+    margin-top: 1px;
+  }
+
+  /* HP Bar */
+  .hp-bar-container {
+    padding: 12px 20px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 16px;
+  }
+
+  .hp-bar-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+
+  .hp-bar-label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.06em; }
+  .hp-bar-value { font-family: var(--font-mono); font-size: 12px; color: var(--text-secondary); }
+
+  .hp-bar {
+    height: 8px;
+    background: var(--bg-card);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .hp-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    background: var(--green);
+    transition: width 0.4s ease;
+  }
+
+  .hp-bar-fill.wounded { background: var(--amber); }
+  .hp-bar-fill.critical { background: var(--red); }
+
+  /* Stats grid */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .stat-cell {
+    text-align: center;
+    padding: 10px 4px 8px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+
+  .stat-value {
+    font-family: var(--font-mono);
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--text-primary);
+    line-height: 1;
+  }
+
+  .stat-name {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+
+  .stat-trained {
+    font-size: 8px;
+    color: var(--amber);
+    margin-top: 2px;
+  }
+
+  /* Cards — reusable container */
+  .card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .card-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-label);
+    font-weight: 600;
+  }
+
+  .card-badge {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: var(--bg-card);
+    color: var(--text-dim);
+  }
+
+  .card-body {
+    padding: 12px 16px;
+  }
+
+  /* Inventory list */
+  .inventory-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+  }
+
+  .inventory-item:last-child { border-bottom: none; }
+
+  .inventory-item-name {
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .inventory-item-detail {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+
+  .slot-indicator {
+    font-size: 10px;
+    color: var(--text-dim);
+    background: var(--bg-card);
+    padding: 1px 6px;
+    border-radius: 3px;
+  }
+
+  /* Training pills */
+  .training-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .training-pill {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 12px;
+    background: var(--amber-dim);
+    color: var(--amber);
+    border: 1px solid rgba(232,164,74,0.2);
+  }
+
+  /* Countdown dice */
+  .countdown-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+  }
+
+  .countdown-row:last-child { border-bottom: none; }
+
+  .countdown-name { color: var(--text-secondary); }
+
+  .countdown-die {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: var(--bg-card);
+    color: var(--text-primary);
+  }
+
+  .countdown-die.low { color: var(--red); background: var(--red-dim); }
+
+  /* Two-column layout for cards */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  /* ========================================
+     RIGHT DRAWER — Context panel
+     ======================================== */
+
+  .right-drawer {
+    grid-row: 1 / -1;
+    background: var(--bg-surface);
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .drawer-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .drawer-close {
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    border: none;
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+
+  .drawer-close:hover { background: var(--bg-card); color: var(--text-secondary); }
+
+  .drawer-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .drawer-tab {
+    flex: 1;
+    padding: 8px;
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-dim);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.15s;
+  }
+
+  .drawer-tab:hover { color: var(--text-secondary); }
+  .drawer-tab.active { color: var(--amber); border-bottom-color: var(--amber); }
+
+  .drawer-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 16px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  /* Quest list in drawer */
+  .quest-item {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .quest-item:last-child { border-bottom: none; }
+
+  .quest-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 3px;
+  }
+
+  .quest-desc {
+    font-size: 11px;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+
+  .quest-tag {
+    font-size: 9px;
+    padding: 1px 6px;
+    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+  }
+
+  .quest-tag.active { background: var(--green-dim); color: var(--green); }
+  .quest-tag.developing { background: var(--blue-dim); color: var(--blue); }
+
+  /* NPC card in drawer */
+  .npc-card {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .npc-card:last-child { border-bottom: none; }
+
+  .npc-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+
+  .npc-meta {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 2px;
+  }
+
+  .npc-disposition {
+    display: inline-block;
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 3px;
+    margin-top: 4px;
+  }
+
+  .npc-disposition.friendly { background: var(--green-dim); color: var(--green); }
+  .npc-disposition.neutral { background: var(--blue-dim); color: var(--blue); }
+  .npc-disposition.hostile { background: var(--red-dim); color: var(--red); }
+
+  /* Session log in drawer */
+  .log-entry {
+    display: flex;
+    gap: 8px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+  }
+
+  .log-entry:last-child { border-bottom: none; }
+
+  .log-tag {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    background: var(--bg-card);
+    color: var(--text-dim);
+    white-space: nowrap;
+    align-self: flex-start;
+    margin-top: 2px;
+  }
+
+  .log-tag.event { color: var(--amber); background: var(--amber-dim); }
+  .log-tag.discovery { color: var(--green); background: var(--green-dim); }
+  .log-tag.thread { color: var(--blue); background: var(--blue-dim); }
+  .log-tag.world-advance { color: var(--red); background: var(--red-dim); }
+
+  .log-text { color: var(--text-secondary); line-height: 1.5; }
+
+  /* ========================================
+     BOTTOM BAR — Persistent utility strip
+     ======================================== */
+
+  .bottom-bar {
+    grid-column: 2 / -1;
+    background: var(--bg-rail);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 24px;
+    font-size: 11px;
+    overflow-x: auto;
+  }
+
+  .bar-section {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
+  }
+
+  .bar-label {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+  }
+
+  .bar-divider {
+    width: 1px;
+    height: 24px;
+    background: var(--border);
+  }
+
+  /* Mini countdown in bottom bar */
+  .bar-countdown {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
+
+  .bar-countdown-icon {
+    font-size: 12px;
+  }
+
+  .bar-countdown.low { color: var(--red); }
+
+  /* Mini clock in bottom bar */
+  .bar-clock {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .clock-segments {
+    display: flex;
+    gap: 2px;
+  }
+
+  .clock-seg {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    border: 1px solid var(--border-light);
+    background: transparent;
+  }
+
+  .clock-seg.filled { background: var(--amber); border-color: var(--amber); }
+
+  .bar-clock-label {
+    font-size: 10px;
+    color: var(--text-dim);
+    max-width: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Mini myth omen in bottom bar */
+  .bar-myth {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .myth-pips {
+    display: flex;
+    gap: 2px;
+  }
+
+  .myth-pip {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    border: 1px solid var(--border-light);
+  }
+
+  .myth-pip.filled { background: var(--red); border-color: var(--red); }
+
+  .bar-myth-label {
+    font-size: 10px;
+    color: var(--text-dim);
+  }
+
+  /* Calendar in bottom bar */
+  .bar-calendar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-secondary);
+    font-size: 11px;
+  }
+
+  .bar-calendar-icon { font-size: 13px; }
+
+  /* Danger level badge */
+  .bar-danger {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+  }
+
+  .bar-danger.safe { background: var(--green-dim); color: var(--green); }
+  .bar-danger.unsafe { background: var(--amber-dim); color: var(--amber); }
+  .bar-danger.risky { background: var(--red-dim); color: var(--red); }
+
+  /* ========================================
+     WIREFRAME ANNOTATIONS
+     ======================================== */
+
+  .annotation {
+    position: relative;
+    cursor: help;
+  }
+
+  .annotation::after {
+    content: attr(data-note);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--amber);
+    color: #0f1117;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 500;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s;
+    z-index: 200;
+    max-width: 280px;
+    white-space: normal;
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  .annotation:hover::after { opacity: 1; }
+
+  /* Design notes panel */
+  .design-notes {
+    position: fixed;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 300;
+    background: var(--amber);
+    color: #0f1117;
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(232,164,74,0.3);
+  }
+
+  .design-notes:hover { filter: brightness(1.1); }
+
+  .notes-panel {
+    position: fixed;
+    top: 48px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 300;
+    background: var(--bg-surface);
+    border: 1px solid var(--amber);
+    border-radius: 10px;
+    padding: 20px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 70vh;
+    overflow-y: auto;
+    display: none;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+  }
+
+  .notes-panel.visible { display: block; }
+
+  .notes-panel h3 {
+    font-family: var(--font-display);
+    font-size: 14px;
+    color: var(--amber);
+    margin: 16px 0 8px;
+  }
+
+  .notes-panel h3:first-child { margin-top: 0; }
+
+  .notes-panel p, .notes-panel li {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 6px;
+  }
+
+  .notes-panel ul { padding-left: 16px; }
+
+  .notes-panel code {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    background: var(--bg-card);
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: var(--amber);
+  }
+</style>
+</head>
+<body>
+
+<!-- Design notes toggle -->
+<div class="design-notes" onclick="document.querySelector('.notes-panel').classList.toggle('visible')">
+  ⚡ WIREFRAME v1 — Click for architecture notes
+</div>
+
+<div class="notes-panel">
+  <h3>Layout Architecture</h3>
+  <p>Single-viewport app shell with 4 persistent zones. No page scrolling — only internal panel scrolling. This creates the "application" feel rather than "website" feel.</p>
+  <ul>
+    <li><strong>Left Rail (64px):</strong> Icon-only navigation + character minicard. Always visible. Inspired by Discord's server bar.</li>
+    <li><strong>Center Workspace (flexible):</strong> Primary content area. Shows the active view (Player, GM, Campaign, Media, Analytics). Scrolls internally.</li>
+    <li><strong>Right Drawer (320px, collapsible):</strong> Context-sensitive detail panel. Quests, NPCs, session log, location details. Can be toggled to give center full width.</li>
+    <li><strong>Bottom Bar (52px):</strong> Persistent utility strip. Countdown dice, clocks, myth omens, calendar date, danger level. Always visible — the "world is ticking" indicators.</li>
+  </ul>
+
+  <h3>View Architecture</h3>
+  <p>The center workspace switches between views via the left rail navigation. Views don't swap the entire app — the rail, drawer, and bottom bar persist.</p>
+  <ul>
+    <li><strong>Player (⚔️):</strong> Character sheet. Primary view during play. Stats, HP, inventory, training, spells, countdown dice.</li>
+    <li><strong>GM Screen (🎭):</strong> Peek behind the screen. GM notes, NPC combat stats, session prep, myth/clock details. Optional — player can choose to never open this.</li>
+    <li><strong>Campaign (🗺️):</strong> High-level overview. Calendar, factions, myths, quest tracker, timeline, world state. The "where are we?" view.</li>
+    <li><strong>Media (📖):</strong> Story & Audio. Chronicle chapters, audiobook player, session transcript links.</li>
+    <li><strong>Analytics (📊):</strong> Play patterns, dice stats, character progression, myth history. Long-term data visualization.</li>
+  </ul>
+
+  <h3>Data Flow</h3>
+  <p>The dashboard is a static HTML file generated by <code>/glintlock:dashboard</code>. All data is injected as a JSON object at generation time. The player refreshes the browser tab after running the command. No server, no WebSocket, no real-time sync.</p>
+
+  <h3>Interaction Model</h3>
+  <p>Player runs Claude Code in terminal alongside the dashboard in browser. They play in the terminal, reference the dashboard. After significant state changes, they run <code>/glintlock:dashboard</code> and refresh. This is the companion app pattern — low complexity, high utility.</p>
+
+  <h3>Hover Annotations</h3>
+  <p>Hover over elements with a subtle amber border to see design notes about that specific component.</p>
+</div>
+
+<!-- APP SHELL -->
+<div class="app-shell" id="appShell">
+
+  <!-- LEFT RAIL -->
+  <nav class="left-rail">
+    <div class="rail-logo annotation" data-note="Glintlock brand mark. Clicking returns to Player view.">G</div>
+    <div class="rail-divider"></div>
+
+    <button class="rail-btn active" onclick="switchView('player')" data-view="player">
+      ⚔️
+      <span class="tooltip">Player</span>
+    </button>
+    <button class="rail-btn" onclick="switchView('gm')" data-view="gm">
+      🎭
+      <span class="tooltip">GM Screen</span>
+    </button>
+    <button class="rail-btn" onclick="switchView('campaign')" data-view="campaign">
+      🗺️
+      <span class="tooltip">Campaign</span>
+    </button>
+    <button class="rail-btn" onclick="switchView('media')" data-view="media">
+      📖
+      <span class="tooltip">Media</span>
+    </button>
+    <button class="rail-btn" onclick="switchView('analytics')" data-view="analytics">
+      📊
+      <span class="tooltip">Analytics</span>
+    </button>
+
+    <div class="rail-divider"></div>
+
+    <button class="rail-btn" onclick="toggleDrawer()">
+      📋
+      <span class="tooltip">Toggle Drawer</span>
+    </button>
+
+    <div class="rail-spacer"></div>
+
+    <!-- Character minicard -->
+    <div class="rail-minicard annotation" data-note="Always-visible character vital signs. HP bar color reflects health state (green/amber/red).">
+      <div style="font-size: 18px;">⚔️</div>
+      <div class="minicard-hp">
+        <div class="minicard-hp-fill wounded" style="width: 67%;"></div>
+      </div>
+      <div class="minicard-label">8/12</div>
+      <div class="minicard-label" style="color: var(--amber);">A3</div>
+    </div>
+  </nav>
+
+  <!-- CENTER WORKSPACE -->
+  <main class="center-workspace" id="centerWorkspace">
+
+    <!-- ====== PLAYER VIEW ====== -->
+    <div class="view" id="view-player">
+
+      <div class="view-header">
+        <div style="display:flex;align-items:baseline;gap:8px;">
+          <span class="view-title">Character Sheet</span>
+          <span class="view-subtitle">Last updated 3 min ago</span>
+        </div>
+        <div class="view-actions">
+          <button class="btn-small" onclick="alert('Would run /glintlock:dashboard to refresh')">↻ Refresh</button>
+        </div>
+      </div>
+
+      <!-- Hero banner -->
+      <div class="char-hero annotation" data-note="Hero banner — name, class, ancestry, level, and big vitals at a glance. This is the first thing the player sees.">
+        <div class="char-avatar">⚔️</div>
+        <div class="char-identity">
+          <h2>Kael Ashwick</h2>
+          <div class="char-meta">Human Warden — Level 2 · Deserter</div>
+        </div>
+        <div class="char-vitals">
+          <div class="vital-block">
+            <div class="vital-value">8</div>
+            <div class="vital-label">HP</div>
+          </div>
+          <div class="vital-block">
+            <div class="vital-value">3</div>
+            <div class="vital-label">Armor</div>
+          </div>
+          <div class="vital-block">
+            <div class="vital-value" style="color: var(--amber);">23</div>
+            <div class="vital-label">Gold</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HP Bar -->
+      <div class="hp-bar-container">
+        <div class="hp-bar-header">
+          <span class="hp-bar-label">Hit Points</span>
+          <span class="hp-bar-value">8 / 12</span>
+        </div>
+        <div class="hp-bar">
+          <div class="hp-bar-fill wounded" style="width: 67%;"></div>
+        </div>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="stats-grid annotation" data-note="6 stats, 1-10 scale. Trained skills shown beneath relevant stats. Difficulty = 20 − Stat (untrained) or 20 − Stat×2 (trained).">
+        <div class="stat-cell">
+          <div class="stat-value">7</div>
+          <div class="stat-name">Vigor</div>
+          <div class="stat-trained">Athletics</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-value">5</div>
+          <div class="stat-name">Reflex</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-value">4</div>
+          <div class="stat-name">Wits</div>
+          <div class="stat-trained">Awareness</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-value">6</div>
+          <div class="stat-name">Resolve</div>
+          <div class="stat-trained">Fortitude</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-value">3</div>
+          <div class="stat-name">Presence</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-value">4</div>
+          <div class="stat-name">Lore</div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <!-- Training -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Training</span>
+          </div>
+          <div class="card-body">
+            <div class="training-list">
+              <span class="training-pill">Athletics</span>
+              <span class="training-pill">Endurance</span>
+              <span class="training-pill">Fortitude</span>
+              <span class="training-pill">Awareness</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Countdown Dice -->
+        <div class="card annotation" data-note="Countdown dice — the 'world is ticking' resource pressure. Die size steps down (d12→d10→d8→d6→d4→exhausted). Low dice highlighted in red.">
+          <div class="card-header">
+            <span class="card-title">Countdown Dice</span>
+          </div>
+          <div class="card-body">
+            <div class="countdown-row">
+              <span class="countdown-name">🔥 Torches</span>
+              <span class="countdown-die">d8</span>
+            </div>
+            <div class="countdown-row">
+              <span class="countdown-name">🍖 Rations</span>
+              <span class="countdown-die">d6</span>
+            </div>
+            <div class="countdown-row">
+              <span class="countdown-name">🏹 Arrows</span>
+              <span class="countdown-die low">d4</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Inventory -->
+      <div class="card annotation" data-note="Inventory with gear slot tracking. Worn items don't take slots. Gear slots = Vigor + 5.">
+        <div class="card-header">
+          <span class="card-title">Inventory</span>
+          <span class="card-badge">7 / 12 slots</span>
+        </div>
+        <div class="card-body">
+          <div class="inventory-item">
+            <span class="inventory-item-name"><span>⚔️</span> Longsword</span>
+            <span class="inventory-item-detail">1d8+Vigor · 1 slot</span>
+          </div>
+          <div class="inventory-item">
+            <span class="inventory-item-name"><span>🛡️</span> Shield</span>
+            <span class="inventory-item-detail">+1 Armor · 1 slot</span>
+          </div>
+          <div class="inventory-item">
+            <span class="inventory-item-name"><span>🔗</span> Chainmail</span>
+            <span class="inventory-item-detail">+2 Armor · 2 slots</span>
+          </div>
+          <div class="inventory-item">
+            <span class="inventory-item-name"><span>🔥</span> Torches ×2</span>
+            <span class="inventory-item-detail">1 slot</span>
+          </div>
+          <div class="inventory-item">
+            <span class="inventory-item-name"><span>🍖</span> Rations ×3</span>
+            <span class="inventory-item-detail">1 slot</span>
+          </div>
+          <div class="inventory-item">
+            <span class="inventory-item-name"><span>📿</span> Rope, 60ft</span>
+            <span class="inventory-item-detail">1 slot</span>
+          </div>
+          <div class="inventory-item" style="color: var(--text-dim); font-style: italic;">
+            <span class="inventory-item-name"><span>👢</span> Military boots</span>
+            <span class="inventory-item-detail">worn</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Class features + ancestry -->
+      <div class="two-col">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Class Features</span>
+          </div>
+          <div class="card-body" style="font-size: 12px; color: var(--text-secondary);">
+            <div style="margin-bottom: 6px;"><strong style="color: var(--text-primary);">Shield Wall</strong> — +1 Armor to close allies. Auto-pass one Vigor/Resolve check per rest.</div>
+            <div><strong style="color: var(--text-primary);">HP Die:</strong> d10</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Ancestry Traits</span>
+          </div>
+          <div class="card-body" style="font-size: 12px; color: var(--text-secondary);">
+            <div style="margin-bottom: 6px;"><strong style="color: var(--text-primary);">Adaptable</strong> — 1 extra trained skill. 1 reroll per session.</div>
+            <div><strong style="color: var(--text-primary);">Languages:</strong> Common, Dwerrow</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Location -->
+      <div class="card annotation" data-note="Current location with danger level. Clicking the location name could open the location detail in the right drawer.">
+        <div class="card-header">
+          <span class="card-title">Current Location</span>
+          <span class="bar-danger safe">Safe</span>
+        </div>
+        <div class="card-body" style="font-size: 12px; color: var(--text-secondary);">
+          <strong style="color: var(--text-primary);">Thornwall — Warden's Hall</strong><br>
+          A squat stone building at the center of Thornwall. Maps and reports cover a long table. The air smells of woodsmoke and old ink.
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ====== GM VIEW (placeholder) ====== -->
+    <div class="view" id="view-gm" style="display:none;">
+      <div class="view-header">
+        <span class="view-title">GM Screen</span>
+        <span class="view-subtitle">Behind the screen — session prep, NPC stats, myths, clocks</span>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Strong Start</span></div>
+        <div class="card-body" style="font-size: 12px; color: var(--text-secondary); line-height: 1.7;">
+          The messenger arrives at dawn, bleeding from a wound that wasn't made by any blade Kael recognizes. She collapses at the gate, clutching a sealed letter addressed to Commander Vess. The seal is one Kael has seen before — from the regiment he deserted.
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Active Secrets</span><span class="card-badge">3 undelivered</span></div>
+        <div class="card-body" style="font-size: 12px; color: var(--text-secondary);">
+          <div style="margin-bottom: 10px;">
+            <strong style="color: var(--text-primary);">The desertion was ordered</strong> — Kael's commanding officer told him to run. Someone wanted the garrison weakened.<br>
+            <span style="font-size: 11px; color: var(--text-dim);">Discovery: sealed letter · Vess's locked desk · tavern rumor from trader</span>
+          </div>
+          <div style="margin-bottom: 10px;">
+            <strong style="color: var(--text-primary);">The Undercroft connects to the mine</strong> — Tunnels beneath Thornwall reach the Ashfall Crags.<br>
+            <span style="font-size: 11px; color: var(--text-dim);">Discovery: old map in the Stacks · Corvin knows · following the sounds</span>
+          </div>
+          <div>
+            <strong style="color: var(--text-primary);">The Green Maw feeds on iron</strong> — Axes and saws left in the Thornwood are found rusted and overgrown overnight.<br>
+            <span style="font-size: 11px; color: var(--text-dim);">Discovery: woodcutter's complaint · investigating the logging camp · Lore check in deep forest</span>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">NPC Moves</span></div>
+        <div class="card-body" style="font-size: 12px; color: var(--text-secondary);">
+          <div style="margin-bottom: 8px;">
+            <strong style="color: var(--text-primary);">Corvin Half-Tooth</strong> — Trying to buy information about the sealed letter before Kael reads it. Wants to stay ahead of whatever's coming. Will offer Kael a drink and fish for details.
+          </div>
+          <div>
+            <strong style="color: var(--text-primary);">Commander Vess</strong> — Reinforcing the south wall. Suspicious of the messenger's story. Will ask Kael to escort a patrol — testing his loyalty.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== CAMPAIGN VIEW (placeholder) ====== -->
+    <div class="view" id="view-campaign" style="display:none;">
+      <div class="view-header">
+        <span class="view-title">Campaign Overview</span>
+        <span class="view-subtitle">The Pale Reach — Day 14, Harvest Moon</span>
+      </div>
+      <div class="card annotation" data-note="Calendar view — shows current date, season, weather, upcoming events. GM version shows hidden timelines too.">
+        <div class="card-header"><span class="card-title">Calendar</span></div>
+        <div class="card-body" style="font-size: 12px; color: var(--text-secondary);">
+          <strong style="color: var(--text-primary);">Day 14, Harvest Moon</strong> · Late autumn · First frosts<br>
+          <span style="color: var(--text-dim);">Full moon in 3 days · Market day in 2 days · First snow expected within the week</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">World State</span></div>
+        <div class="card-body" style="font-size: 12px; color: var(--text-secondary); line-height: 1.7;">
+          Thornwall holds, but barely. The garrison is undermanned and the south road remains unsafe. Cold winds from the Wolds carry an unnatural chill. The Undercroft scratches grow louder each night. Kael has earned cautious respect from Vess but Corvin watches from the shadows.
+        </div>
+      </div>
+      <div class="card annotation" data-note="Myth omen tracks — visual 0-6 progression. Each pip represents an omen level. Color shifts from dim to red as omens rise.">
+        <div class="card-header"><span class="card-title">Myths</span></div>
+        <div class="card-body">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--border);">
+            <span style="font-size: 12px; color: var(--text-primary);">The Hollow King</span>
+            <div class="myth-pips">
+              <div class="myth-pip filled"></div>
+              <div class="myth-pip"></div>
+              <div class="myth-pip"></div>
+              <div class="myth-pip"></div>
+              <div class="myth-pip"></div>
+              <div class="myth-pip"></div>
+            </div>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--border);">
+            <span style="font-size: 12px; color: var(--text-primary);">The Green Maw</span>
+            <div class="myth-pips">
+              <div class="myth-pip"></div>
+              <div class="myth-pip"></div>
+              <div class="myth-pip"></div>
+              <div class="myth-pip"></div>
+              <div class="myth-pip"></div>
+              <div class="myth-pip"></div>
+            </div>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--border);">
+            <span style="font-size: 12px; color: var(--text-primary);">The Pale Shepherd</span>
+            <div class="myth-pips">
+              <div class="myth-pip"></div>
+              <div class="myth-pip"></div>
+              <div class="myth-pip"></div>
+              <div class="myth-pip"></div>
+              <div class="myth-pip"></div>
+              <div class="myth-pip"></div>
+            </div>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--border);">
+            <span style="font-size: 12px; color: var(--text-primary);">The Iron Seam</span>
+            <div class="myth-pips">
+              <div class="myth-pip"></div>
+              <div class="myth-pip"></div>
+              <div class="myth-pip"></div>
+              <div class="myth-pip"></div>
+              <div class="myth-pip"></div>
+              <div class="myth-pip"></div>
+            </div>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 0;">
+            <span style="font-size: 12px; color: var(--text-primary);">The Antler Court</span>
+            <div class="myth-pips">
+              <div class="myth-pip"></div>
+              <div class="myth-pip"></div>
+              <div class="myth-pip"></div>
+              <div class="myth-pip"></div>
+              <div class="myth-pip"></div>
+              <div class="myth-pip"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== MEDIA VIEW (placeholder) ====== -->
+    <div class="view" id="view-media" style="display:none;">
+      <div class="view-header">
+        <span class="view-title">Story & Audio</span>
+        <span class="view-subtitle">1 chapter · 0 audiobooks</span>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Chronicles</span></div>
+        <div class="card-body" style="font-size: 12px; color: var(--text-secondary); line-height: 1.7;">
+          <div style="padding: 8px 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <strong style="color: var(--text-primary);">Chapter 1 — The Deserter's Road</strong><br>
+              <span style="color: var(--text-dim);">Covers sessions 1-3 · 2,400 words</span>
+            </div>
+            <span style="font-size: 10px; color: var(--green); background: var(--green-dim); padding: 2px 8px; border-radius: 4px;">Read</span>
+          </div>
+          <div style="padding: 8px 0; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <strong style="color: var(--text-primary);">Chapter 2 — In progress...</strong><br>
+              <span style="color: var(--text-dim);">Being written from recent events</span>
+            </div>
+            <span style="font-size: 10px; color: var(--amber); background: var(--amber-dim); padding: 2px 8px; border-radius: 4px;">Writing</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== ANALYTICS VIEW (placeholder) ====== -->
+    <div class="view" id="view-analytics" style="display:none;">
+      <div class="view-header">
+        <span class="view-title">Analytics</span>
+        <span class="view-subtitle">Play patterns and campaign statistics</span>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Play Summary</span></div>
+        <div class="card-body">
+          <div class="two-col" style="gap: 8px;">
+            <div class="vital-block">
+              <div class="vital-value">14</div>
+              <div class="vital-label">Days Active</div>
+            </div>
+            <div class="vital-block">
+              <div class="vital-value">8</div>
+              <div class="vital-label">Play Sessions</div>
+            </div>
+            <div class="vital-block">
+              <div class="vital-value">47</div>
+              <div class="vital-label">Dice Rolls</div>
+            </div>
+            <div class="vital-block">
+              <div class="vital-value">3</div>
+              <div class="vital-label">NPCs Met</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Activity Type Distribution</span></div>
+        <div class="card-body" style="font-size: 12px; color: var(--text-dim); text-align: center; padding: 30px;">
+          [ Bar chart placeholder — Combat / Exploration / Social / Downtime ratios ]
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Myth Omen History</span></div>
+        <div class="card-body" style="font-size: 12px; color: var(--text-dim); text-align: center; padding: 30px;">
+          [ Line chart placeholder — omen levels over calendar days ]
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- RIGHT DRAWER -->
+  <aside class="right-drawer" id="rightDrawer">
+    <div class="drawer-header">
+      <span class="drawer-title">Context Panel</span>
+      <button class="drawer-close" onclick="toggleDrawer()">✕</button>
+    </div>
+    <div class="drawer-tabs">
+      <button class="drawer-tab active" onclick="switchDrawerTab(this, 'quests')">Quests</button>
+      <button class="drawer-tab" onclick="switchDrawerTab(this, 'npcs')">NPCs</button>
+      <button class="drawer-tab" onclick="switchDrawerTab(this, 'log')">Log</button>
+    </div>
+    <div class="drawer-body">
+
+      <!-- Quests tab -->
+      <div class="drawer-content" id="drawer-quests">
+        <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); margin-bottom: 8px;">Active</div>
+        <div class="quest-item">
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span class="quest-tag active">Active</span>
+            <span class="quest-name">Secure the Road</span>
+          </div>
+          <div class="quest-desc">Commander Vess needs the southern road cleared for supply caravans. Goblin raiding party reported near the Thornwood edge.</div>
+        </div>
+        <div class="quest-item">
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span class="quest-tag active">Active</span>
+            <span class="quest-name">Strange Sounds</span>
+          </div>
+          <div class="quest-desc">Something scrapes beneath the Undercroft at night. Investigate.</div>
+        </div>
+
+        <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); margin: 14px 0 8px;">Developing</div>
+        <div class="quest-item">
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span class="quest-tag developing">Developing</span>
+            <span class="quest-name">The Shepherd's Fog</span>
+          </div>
+          <div class="quest-desc">Fog from the Fenway is rolling closer to Thornwall each morning. No one's talking about it yet.</div>
+        </div>
+      </div>
+
+      <!-- NPCs tab -->
+      <div class="drawer-content" id="drawer-npcs" style="display:none;">
+        <div class="npc-card">
+          <div class="npc-name">Commander Alara Vess</div>
+          <div class="npc-meta">Warden's Hall · Garrison commander</div>
+          <div class="npc-disposition neutral">Cautious</div>
+        </div>
+        <div class="npc-card">
+          <div class="npc-name">Corvin Half-Tooth</div>
+          <div class="npc-meta">Mended Flask · Tavernkeeper</div>
+          <div class="npc-disposition neutral">Neutral</div>
+        </div>
+        <div class="npc-card">
+          <div class="npc-name">Grukk</div>
+          <div class="npc-meta">Thornwood Edge · Goblin raider</div>
+          <div class="npc-disposition hostile">Hostile</div>
+        </div>
+      </div>
+
+      <!-- Log tab -->
+      <div class="drawer-content" id="drawer-log" style="display:none;">
+        <div class="log-entry">
+          <span class="log-tag world-advance">advance</span>
+          <span class="log-text">The Hollow King's omen advances to 1 — cold winds from the Wolds</span>
+        </div>
+        <div class="log-entry">
+          <span class="log-tag event">event</span>
+          <span class="log-text">Met Corvin Half-Tooth at the Mended Flask — traded a coin for a rumor</span>
+        </div>
+        <div class="log-entry">
+          <span class="log-tag discovery">discovery</span>
+          <span class="log-text">Bounty board has three postings — road patrol, strange sounds, missing shepherd</span>
+        </div>
+        <div class="log-entry">
+          <span class="log-tag event">event</span>
+          <span class="log-text">Arrived in Thornwall and reported to Commander Vess</span>
+        </div>
+        <div class="log-entry">
+          <span class="log-tag thread">thread</span>
+          <span class="log-text">Strange scraping sounds beneath the Undercroft at night</span>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- BOTTOM BAR -->
+  <footer class="bottom-bar annotation" data-note="Persistent utility strip — always visible. Shows countdown dice, clocks, myth omens, calendar date, danger level. The 'world is ticking' indicators.">
+
+    <div class="bar-section">
+      <span class="bar-label">Resources</span>
+      <span class="bar-countdown"><span class="bar-countdown-icon">🔥</span> d8</span>
+      <span class="bar-countdown"><span class="bar-countdown-icon">🍖</span> d6</span>
+      <span class="bar-countdown low"><span class="bar-countdown-icon">🏹</span> d4</span>
+    </div>
+
+    <div class="bar-divider"></div>
+
+    <div class="bar-section">
+      <span class="bar-label">Clocks</span>
+      <div class="bar-clock">
+        <div class="clock-segments">
+          <div class="clock-seg filled"></div>
+          <div class="clock-seg filled"></div>
+          <div class="clock-seg"></div>
+          <div class="clock-seg"></div>
+          <div class="clock-seg"></div>
+          <div class="clock-seg"></div>
+          <div class="clock-seg"></div>
+          <div class="clock-seg"></div>
+        </div>
+        <span class="bar-clock-label">Winter</span>
+      </div>
+      <div class="bar-clock">
+        <div class="clock-segments">
+          <div class="clock-seg filled"></div>
+          <div class="clock-seg"></div>
+          <div class="clock-seg"></div>
+          <div class="clock-seg"></div>
+          <div class="clock-seg"></div>
+          <div class="clock-seg"></div>
+        </div>
+        <span class="bar-clock-label">Morale</span>
+      </div>
+    </div>
+
+    <div class="bar-divider"></div>
+
+    <div class="bar-section">
+      <span class="bar-label">Omens</span>
+      <div class="bar-myth">
+        <div class="myth-pips">
+          <div class="myth-pip filled"></div>
+          <div class="myth-pip"></div>
+          <div class="myth-pip"></div>
+          <div class="myth-pip"></div>
+          <div class="myth-pip"></div>
+          <div class="myth-pip"></div>
+        </div>
+        <span class="bar-myth-label">Hollow King</span>
+      </div>
+    </div>
+
+    <div class="bar-divider"></div>
+
+    <div class="bar-section">
+      <div class="bar-calendar">
+        <span class="bar-calendar-icon">📅</span>
+        Day 14, Harvest Moon
+      </div>
+    </div>
+
+    <div style="margin-left: auto;">
+      <span class="bar-danger safe">Safe Zone</span>
+    </div>
+
+  </footer>
+
+</div>
+
+<script>
+  function switchView(name) {
+    document.querySelectorAll('.view').forEach(v => v.style.display = 'none');
+    document.getElementById('view-' + name).style.display = 'block';
+    document.querySelectorAll('.rail-btn[data-view]').forEach(b => b.classList.remove('active'));
+    document.querySelector(`.rail-btn[data-view="${name}"]`).classList.add('active');
+  }
+
+  function toggleDrawer() {
+    document.getElementById('appShell').classList.toggle('right-collapsed');
+  }
+
+  function switchDrawerTab(btn, tabName) {
+    document.querySelectorAll('.drawer-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.drawer-content').forEach(c => c.style.display = 'none');
+    document.getElementById('drawer-' + tabName).style.display = 'block';
+  }
+</script>
+
+</body>
+</html>

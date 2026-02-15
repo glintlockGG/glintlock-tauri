@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import ReactMarkdown from "react-markdown";
 
 interface ChatMessage {
   id: string;
@@ -66,8 +67,8 @@ export default function ChatView({ messages, onSendMessage, isLoading, streaming
             <div className="w-8 h-8 rounded-full bg-[var(--amber-dim)] flex items-center justify-center flex-shrink-0">
               <span className="text-[var(--amber)] text-xs font-bold">GM</span>
             </div>
-            <div className="flex-1 bg-[var(--bg-card)] rounded-lg px-4 py-3 text-sm text-[var(--text)] whitespace-pre-wrap">
-              {streamingText}
+            <div className="flex-1 bg-[var(--bg-card)] rounded-lg px-4 py-3 text-sm text-[var(--text)] prose-gm">
+              <ReactMarkdown>{streamingText}</ReactMarkdown>
               <span className="inline-block w-1.5 h-4 bg-[var(--amber)] ml-0.5 animate-pulse" />
             </div>
           </div>
@@ -131,13 +132,13 @@ function MessageBubble({ message }: { message: ChatMessage }) {
         </span>
       </div>
       <div
-        className={`flex-1 rounded-lg px-4 py-3 text-sm whitespace-pre-wrap ${
+        className={`flex-1 rounded-lg px-4 py-3 text-sm ${
           isUser
-            ? "bg-[var(--blue-dim)] text-[var(--text)] max-w-[70%] ml-auto"
-            : "bg-[var(--bg-card)] text-[var(--text)]"
+            ? "bg-[var(--blue-dim)] text-[var(--text)] max-w-[70%] ml-auto whitespace-pre-wrap"
+            : "bg-[var(--bg-card)] text-[var(--text)] prose-gm"
         }`}
       >
-        {message.text}
+        {isUser ? message.text : <ReactMarkdown>{message.text}</ReactMarkdown>}
       </div>
     </div>
   );

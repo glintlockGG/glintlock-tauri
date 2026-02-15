@@ -37,13 +37,14 @@
 
   /* Layout */
   --rail-width:   64px;
-  --bottom-height: 44px;
-  --right-width:  300px;
+  --bottom-height: 52px;
+  --right-width:  320px;
 
   /* Typography */
   --font-display:   'Cinzel', serif;
   --font-body:      'DM Sans', system-ui, sans-serif;
   --font-narrative: 'Crimson Pro', serif;
+  --font-mono:      'JetBrains Mono', monospace;
 }
 
 /* Base styles */
@@ -74,7 +75,7 @@ body {
 }
 
 .left-rail {
-  grid-row: 1;
+  grid-row: 1 / -1;
   grid-column: 1;
   background: var(--bg-rail);
   border-right: 1px solid var(--border);
@@ -95,18 +96,102 @@ body {
 }
 
 .right-drawer {
-  grid-row: 1;
+  grid-row: 1 / -1;
   grid-column: 3;
   background: var(--bg-surface);
   border-left: 1px solid var(--border);
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .bottom-bar {
   grid-row: 2;
-  grid-column: 1 / -1;
+  grid-column: 2 / -1;
   background: var(--bg-rail);
   border-top: 1px solid var(--border);
+}
+
+/* View header */
+.view-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Vertical divider for bottom bar */
+.bar-divider {
+  width: 1px;
+  height: 24px;
+  background: var(--border);
+  flex-shrink: 0;
+}
+
+/* GM prose — styles for rendered markdown in chat bubbles */
+.prose-gm p {
+  margin: 0.5em 0;
+}
+.prose-gm p:first-child {
+  margin-top: 0;
+}
+.prose-gm p:last-child {
+  margin-bottom: 0;
+}
+.prose-gm strong {
+  color: var(--amber);
+  font-weight: 600;
+}
+.prose-gm em {
+  font-family: var(--font-narrative);
+  font-style: italic;
+}
+.prose-gm h1, .prose-gm h2, .prose-gm h3 {
+  font-family: var(--font-display);
+  color: var(--amber);
+  margin: 0.75em 0 0.25em;
+  line-height: 1.3;
+}
+.prose-gm h1 { font-size: 1.25em; }
+.prose-gm h2 { font-size: 1.1em; }
+.prose-gm h3 { font-size: 1em; }
+.prose-gm ol, .prose-gm ul {
+  margin: 0.5em 0;
+  padding-left: 1.5em;
+}
+.prose-gm li {
+  margin: 0.25em 0;
+}
+.prose-gm code {
+  background: var(--bg-input);
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+.prose-gm pre {
+  background: var(--bg-input);
+  padding: 0.75em 1em;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 0.5em 0;
+}
+.prose-gm pre code {
+  background: none;
+  padding: 0;
+}
+.prose-gm hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 0.75em 0;
+}
+.prose-gm blockquote {
+  border-left: 3px solid var(--amber-dim);
+  padding-left: 1em;
+  margin: 0.5em 0;
+  color: var(--text-secondary);
+  font-family: var(--font-narrative);
 }
 
 /* Scrollbar styling */
